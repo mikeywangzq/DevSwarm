@@ -47,6 +47,7 @@ from src.agents.qa_agent import QAAgent
 from src.utils.websocket_logger import setup_websocket_logging
 from src.utils.performance import PerformanceMetrics, BenchmarkSuite
 from src.utils.security_scanner import SecurityScanner
+from src.testing.e2e_testing import E2ETestRunner
 
 # Configure logging
 logging.basicConfig(
@@ -476,6 +477,56 @@ def scan_file_security():
 
     except Exception as e:
         logger.error(f"Error scanning file: {e}", exc_info=True)
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+
+@app.route('/api/e2e/run', methods=['POST'])
+def run_e2e_tests():
+    """
+    运行E2E测试
+    测试生成的Web应用的端到端功能
+    """
+    try:
+        if not pm_agent or not pm_agent.current_project_id:
+            return jsonify({
+                'success': False,
+                'error': 'No active project'
+            }), 404
+
+        data = request.get_json() or {}
+        project_id = pm_agent.current_project_id
+        project_path = Path(shared_state.workspace_root) / project_id
+
+        if not project_path.exists():
+            return jsonify({
+                'success': False,
+                'error': 'Project directory not found'
+            }), 404
+
+        # 获取前端和后端URL
+        backend_url = data.get('backend_url', 'http://localhost:5000')
+        frontend_url = data.get('frontend_url', 'http://localhost:8000')
+
+        # 运行E2E测试
+        runner = E2ETestRunner(
+            project_path=str(project_path),
+            backend_url=backend_url,
+            frontend_url=frontend_url
+        )
+
+        # 在事件循环中运行测试
+        report = event_loop.run_until_complete(runner.run_all_tests())
+
+        return jsonify({
+            'success': True,
+            'report': report.to_dict()
+        })
+
+    except Exception as e:
+        logger.error(f"Error running E2E tests: {e}", exc_info=True)
         return jsonify({
             'success': False,
             'error': str(e)
