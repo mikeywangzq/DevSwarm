@@ -308,6 +308,180 @@ def health_check():
     })
 
 
+@app.route('/api/files', methods=['GET'])
+def get_project_files():
+    """
+    获取项目文件列表
+    返回当前项目的所有生成文件的树形结构
+    """
+    try:
+        if not pm_agent or not pm_agent.current_project_id:
+            return jsonify({
+                'success': False,
+                'error': 'No active project'
+            }), 404
+
+        import os
+        from pathlib import Path
+
+        project_id = pm_agent.current_project_id
+        project_path = Path(shared_state.workspace_root) / project_id
+
+        if not project_path.exists():
+            return jsonify({
+                'success': False,
+                'error': 'Project directory not found'
+            }), 404
+
+        def build_file_tree(path, base_path):
+            """递归构建文件树"""
+            items = []
+            try:
+                for item in sorted(path.iterdir()):
+                    rel_path = str(item.relative_to(base_path))
+
+                    if item.is_file():
+                        # 获取文件大小和扩展名
+                        size = item.stat().st_size
+                        ext = item.suffix.lower()
+
+                        items.append({
+                            'type': 'file',
+                            'name': item.name,
+                            'path': rel_path,
+                            'size': size,
+                            'extension': ext
+                        })
+                    elif item.is_dir() and not item.name.startswith('.'):
+                        # 递归处理子目录
+                        children = build_file_tree(item, base_path)
+                        items.append({
+                            'type': 'directory',
+                            'name': item.name,
+                            'path': rel_path,
+                            'children': children
+                        })
+            except PermissionError:
+                pass
+
+            return items
+
+        file_tree = build_file_tree(project_path, project_path)
+
+        return jsonify({
+            'success': True,
+            'project_id': project_id,
+            'files': file_tree
+        })
+
+    except Exception as e:
+        logger.error(f"Error getting project files: {e}", exc_info=True)
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+
+@app.route('/api/files/content', methods=['GET'])
+def get_file_content():
+    """
+    获取文件内容
+    Query参数: file_path - 相对于项目根目录的文件路径
+    """
+    try:
+        if not pm_agent or not pm_agent.current_project_id:
+            return jsonify({
+                'success': False,
+                'error': 'No active project'
+            }), 404
+
+        file_path = request.args.get('file_path', '').strip()
+        if not file_path:
+            return jsonify({
+                'success': False,
+                'error': 'file_path parameter is required'
+            }), 400
+
+        from pathlib import Path
+        project_id = pm_agent.current_project_id
+        full_path = Path(shared_state.workspace_root) / project_id / file_path
+
+        # 安全检查：防止路径遍历攻击
+        try:
+            full_path = full_path.resolve()
+            project_root = (Path(shared_state.workspace_root) / project_id).resolve()
+            if not str(full_path).startswith(str(project_root)):
+                return jsonify({
+                    'success': False,
+                    'error': 'Invalid file path'
+                }), 403
+        except Exception:
+            return jsonify({
+                'success': False,
+                'error': 'Invalid file path'
+            }), 403
+
+        if not full_path.exists() or not full_path.is_file():
+            return jsonify({
+                'success': False,
+                'error': 'File not found'
+            }), 404
+
+        # 读取文件内容
+        try:
+            with open(full_path, 'r', encoding='utf-8') as f:
+                content = f.read()
+
+            # 确定文件类型（用于语法高亮）
+            ext = full_path.suffix.lower()
+            language_map = {
+                '.py': 'python',
+                '.js': 'javascript',
+                '.jsx': 'javascript',
+                '.ts': 'typescript',
+                '.tsx': 'typescript',
+                '.html': 'html',
+                '.css': 'css',
+                '.json': 'json',
+                '.md': 'markdown',
+                '.yaml': 'yaml',
+                '.yml': 'yaml',
+                '.sh': 'bash',
+                '.sql': 'sql',
+                '.go': 'go',
+                '.rs': 'rust',
+                '.java': 'java',
+                '.cpp': 'cpp',
+                '.c': 'c',
+                '.txt': 'text'
+            }
+            language = language_map.get(ext, 'text')
+
+            return jsonify({
+                'success': True,
+                'file_path': file_path,
+                'content': content,
+                'language': language,
+                'size': len(content),
+                'lines': content.count('\n') + 1
+            })
+
+        except UnicodeDecodeError:
+            # 二进制文件
+            return jsonify({
+                'success': False,
+                'error': 'Binary file cannot be previewed',
+                'is_binary': True
+            }), 400
+
+    except Exception as e:
+        logger.error(f"Error getting file content: {e}", exc_info=True)
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+
 if __name__ == '__main__':
     # 初始化系统
     initialize_system()
