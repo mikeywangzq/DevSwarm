@@ -32,6 +32,7 @@ import asyncio
 import logging
 import sys
 from pathlib import Path
+from datetime import datetime
 
 # 添加项目根目录到路径
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
@@ -44,6 +45,7 @@ from src.agents.backend_agent import BackendAgent
 from src.agents.frontend_agent import FrontendAgent
 from src.agents.qa_agent import QAAgent
 from src.utils.websocket_logger import setup_websocket_logging
+from src.utils.performance import PerformanceMetrics, BenchmarkSuite
 
 # Configure logging
 logging.basicConfig(
@@ -306,6 +308,79 @@ def health_check():
         'system': 'DevSwarm Multi-Agent System',
         'message_bus_running': message_bus.is_running if message_bus else False
     })
+
+
+@app.route('/api/performance', methods=['GET'])
+def get_performance_metrics():
+    """
+    获取性能指标摘要
+    返回系统运行的性能统计信息
+    """
+    try:
+        summary = PerformanceMetrics.get_summary()
+        all_metrics = PerformanceMetrics.get_all_metrics()
+
+        return jsonify({
+            'success': True,
+            'summary': summary,
+            'total_metrics': len(all_metrics),
+            'timestamp': datetime.utcnow().isoformat() + 'Z'
+        })
+
+    except Exception as e:
+        logger.error(f"Error getting performance metrics: {e}", exc_info=True)
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+
+@app.route('/api/performance/export', methods=['POST'])
+def export_performance_metrics():
+    """
+    导出性能指标到文件
+    """
+    try:
+        data = request.get_json() or {}
+        filepath = data.get('filepath', './reports/performance_report.json')
+
+        PerformanceMetrics.export_to_file(filepath)
+
+        return jsonify({
+            'success': True,
+            'message': f'Performance metrics exported to {filepath}'
+        })
+
+    except Exception as e:
+        logger.error(f"Error exporting performance metrics: {e}", exc_info=True)
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+
+@app.route('/api/benchmark/run', methods=['POST'])
+def run_benchmark():
+    """
+    运行基准测试
+    """
+    try:
+        suite = BenchmarkSuite()
+
+        # 在事件循环中运行基准测试
+        report = event_loop.run_until_complete(suite.run_all_benchmarks())
+
+        return jsonify({
+            'success': True,
+            'report': report
+        })
+
+    except Exception as e:
+        logger.error(f"Error running benchmark: {e}", exc_info=True)
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
 
 
 @app.route('/api/files', methods=['GET'])
