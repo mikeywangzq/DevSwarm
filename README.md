@@ -148,7 +148,7 @@ graph LR
 |-------|------|----------|----------|
 | **🎯 PM Agent** | 项目经理<br/>编排器 | 需求分析<br/>项目管理 | • 解析用户需求<br/>• 设计API契约<br/>• 分解和分配任务<br/>• 监控项目进度<br/>• 协调Bug修复 |
 | **💻 Backend Agent** | 后端工程师 | Flask<br/>Python<br/>REST API | • 生成Flask代码<br/>• 实现API端点<br/>• 数据存储设计<br/>• 应用代码修复 |
-| **🎨 Frontend Agent** | 前端工程师 | HTML/CSS<br/>JavaScript<br/>UI设计 | • 生成前端页面<br/>• 实现用户交互<br/>• API调用集成<br/>• 响应式设计 |
+| **🎨 Frontend Agent** | 前端工程师 | React/Vue<br/>HTML/CSS<br/>JavaScript | • 生成前端页面（React/Vue/Vanilla）<br/>• 实现用户交互<br/>• API调用集成<br/>• 响应式设计 |
 | **🧪 QA Agent** | 测试工程师 | 集成测试<br/>Bug检测 | • 启动测试服务<br/>• 执行API测试<br/>• 检测Bug并报告<br/>• 验证修复结果 |
 
 ## 🚀 快速开始
@@ -577,6 +577,80 @@ backend/
 └── README.md
 ```
 
+### 6. 多框架前端支持
+
+支持生成多种前端框架，满足不同开发偏好：
+
+#### 支持的前端技术栈:
+
+**📄 Vanilla JavaScript** (默认)
+```bash
+export DEVSWARM_FRONTEND_FRAMEWORK=vanilla
+```
+- 纯HTML/CSS/JavaScript
+- 无框架依赖
+- 轻量级
+- 快速加载
+
+**⚛️ React 18**
+```bash
+export DEVSWARM_FRONTEND_FRAMEWORK=react
+```
+- React Hooks (useState, useEffect)
+- 组件化开发
+- 现代化开发体验
+- create-react-app配置
+
+**🟩 Vue 3**
+```bash
+export DEVSWARM_FRONTEND_FRAMEWORK=vue
+```
+- Composition API
+- 单文件组件(.vue)
+- Vite构建工具
+- 响应式数据绑定
+
+#### 生成的项目结构对比:
+
+**Vanilla JS**:
+```
+frontend/
+├── index.html          # HTML页面
+├── app.js              # JavaScript逻辑
+├── style.css           # 样式
+├── package.json        # 依赖配置
+└── README.md
+```
+
+**React**:
+```
+frontend/
+├── public/
+│   └── index.html      # HTML模板
+├── src/
+│   ├── App.jsx         # React主组件
+│   ├── App.css         # 组件样式
+│   ├── index.js        # 入口文件
+│   └── services/
+│       └── api.js      # API服务层
+├── package.json        # npm依赖
+└── README.md
+```
+
+**Vue 3**:
+```
+frontend/
+├── public/
+│   └── index.html      # HTML模板
+├── src/
+│   ├── App.vue         # Vue主组件
+│   ├── main.js         # 入口文件
+│   └── services/
+│       └── api.js      # API服务层
+├── package.json        # npm依赖
+└── README.md
+```
+
 ### 配置系统
 
 统一的配置管理系统，支持环境变量配置：
@@ -585,7 +659,7 @@ backend/
 # 设置后端语言
 export DEVSWARM_BACKEND_LANGUAGE=nodejs  # flask, nodejs, go
 
-# 设置前端框架 (未来支持)
+# 设置前端框架
 export DEVSWARM_FRONTEND_FRAMEWORK=react  # vanilla, react, vue
 
 # 设置LLM提供商
@@ -792,6 +866,13 @@ print(status)
 - [x] API契约驱动开发
 - [x] 自动化Bug修复
 - [x] Docker支持
+- [x] E2E测试支持（Playwright）
+- [x] 性能测试和基准
+- [x] 安全扫描集成
+- [x] 实时日志流
+- [x] 代码预览功能
+- [x] 多语言后端支持（Flask, Node.js, Go）
+- [x] React/Vue前端生成
 
 ### 🚧 进行中
 
@@ -803,19 +884,9 @@ print(status)
 
 #### 短期（1-3个月）
 
-- [ ] E2E测试支持（Playwright）
-- [ ] 性能测试和基准
-- [ ] 安全扫描集成
-- [ ] 实时日志流
-- [ ] 代码预览功能
-
-#### 中期（3-6个月）
-
-- [ ] 分布式Agent部署
-- [ ] Redis/RabbitMQ消息队列
+- [ ] 分布式Agent部署架构设计
+- [ ] Redis/RabbitMQ消息队列支持
 - [ ] PostgreSQL状态存储
-- [ ] 多语言后端支持（Node.js, Go）
-- [ ] React/Vue前端生成
 
 #### 长期（6-12个月）
 

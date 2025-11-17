@@ -3,22 +3,21 @@ Frontend Agent模块 - 前端开发Agent
 Frontend Agent Module - Frontend Developer
 
 Frontend Agent负责根据API契约实现前端用户界面代码。
-使用LLM生成HTML/JavaScript代码，实现与后端API的交互。
+支持多种前端框架：Vanilla JS、React、Vue。
 
 核心职责:
     1. **读取API契约**: 从共享状态获取API契约定义
-    2. **生成UI代码**: 使用LLM生成前端代码
-        - HTML页面结构
-        - JavaScript交互逻辑
-        - CSS样式（内联或外部）
-        - API调用代码（fetch/axios）
+    2. **生成UI代码**: 根据配置的框架生成前端代码
+        - React: 使用Hooks的现代React应用
+        - Vue: 使用Composition API的Vue 3应用
+        - Vanilla: 原生HTML/JavaScript应用
     3. **代码写入**: 将生成的代码写入frontend目录
     4. **Bug修复**: 根据QA反馈修复前端Bug
 
 技术栈:
-    - HTML5: 页面结构
-    - JavaScript (原生): 交互逻辑
-    - CSS: 样式设计
+    - React 18 + Hooks (可选)
+    - Vue 3 + Composition API (可选)
+    - Vanilla JavaScript (默认)
     - Fetch API: 后端通信
 
 Example:
@@ -31,6 +30,8 @@ from typing import Dict, Any
 import logging
 from .base_agent import BaseAgent
 from ..core.protocol import Task, APIContract
+from ..code_gen.frontend_templates import generate_frontend
+from ..config.settings import get_config
 
 logger = logging.getLogger(__name__)
 
@@ -86,7 +87,7 @@ class FrontendAgent(BaseAgent):
     async def _generate_frontend_code(self, api_contract: APIContract,
                                      frontend_dir: Path) -> Dict[str, Any]:
         """
-        生成前端代码
+        生成前端代码（支持多框架）
 
         Args:
             api_contract: API契约
@@ -95,61 +96,36 @@ class FrontendAgent(BaseAgent):
         Returns:
             生成结果
         """
-        logger.info("Generating frontend code with React...")
+        # 获取配置的前端框架
+        config = get_config()
+        frontend_framework = config.frontend_framework
 
-        # 生成HTML文件
-        html_code = await self._generate_html(api_contract)
-        html_file = frontend_dir / "index.html"
-        with open(html_file, 'w', encoding='utf-8') as f:
-            f.write(html_code)
-        logger.info(f"Generated: {html_file}")
+        logger.info(f"Generating frontend code with {frontend_framework}...")
 
-        # 生成JavaScript文件
-        js_code = await self._generate_javascript(api_contract)
-        js_file = frontend_dir / "app.js"
-        with open(js_file, 'w', encoding='utf-8') as f:
-            f.write(js_code)
-        logger.info(f"Generated: {js_file}")
+        # 使用模板生成器生成代码
+        api_contract_dict = api_contract.to_dict()
+        generated_files = generate_frontend(api_contract_dict, framework=frontend_framework)
 
-        # 生成CSS文件
-        css_code = self._generate_css()
-        css_file = frontend_dir / "style.css"
-        with open(css_file, 'w', encoding='utf-8') as f:
-            f.write(css_code)
-        logger.info(f"Generated: {css_file}")
+        # 写入所有生成的文件
+        files_generated = []
+        for file_path, content in generated_files.items():
+            full_path = frontend_dir / file_path
+            full_path.parent.mkdir(parents=True, exist_ok=True)
 
-        # 生成package.json
-        package_json = self._generate_package_json()
-        package_file = frontend_dir / "package.json"
-        with open(package_file, 'w', encoding='utf-8') as f:
-            f.write(package_json)
-        logger.info(f"Generated: {package_file}")
+            with open(full_path, 'w', encoding='utf-8') as f:
+                f.write(content)
 
-        # 生成README
-        readme = self._generate_frontend_readme()
-        readme_file = frontend_dir / "README.md"
-        with open(readme_file, 'w', encoding='utf-8') as f:
-            f.write(readme)
-        logger.info(f"Generated: {readme_file}")
+            # 如果是脚本文件，添加执行权限
+            if file_path.endswith('.sh'):
+                os.chmod(full_path, 0o755)
 
-        # 生成启动脚本
-        start_script = self._generate_start_script()
-        script_file = frontend_dir / "start.sh"
-        with open(script_file, 'w', encoding='utf-8') as f:
-            f.write(start_script)
-        os.chmod(script_file, 0o755)
-        logger.info(f"Generated: {script_file}")
+            logger.info(f"Generated: {full_path}")
+            files_generated.append(str(full_path))
 
         return {
             "status": "success",
-            "files_generated": [
-                str(html_file),
-                str(js_file),
-                str(css_file),
-                str(package_file),
-                str(readme_file),
-                str(script_file)
-            ],
+            "frontend_framework": frontend_framework,
+            "files_generated": files_generated,
             "output_path": str(frontend_dir)
         }
 
