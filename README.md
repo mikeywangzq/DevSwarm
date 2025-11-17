@@ -402,6 +402,207 @@ Web界面提供实时的项目状态监控：
 - **Agent状态**: 查看每个Agent的当前工作
 - **消息历史**: 追踪Agent间的所有通信
 
+## 🚀 高级特性
+
+### 1. 实时日志流 (WebSocket)
+
+通过WebSocket实现实时日志推送，无需刷新即可查看系统运行状态：
+
+- **实时更新**: 所有Agent活动立即显示
+- **颜色编码**: 不同级别日志使用不同颜色 (DEBUG, INFO, WARNING, ERROR)
+- **自动滚动**: 可切换自动滚动到最新日志
+- **日志过滤**: 按Agent名称、级别过滤
+- **性能优化**: 限制最大日志条目数防止内存溢出
+
+```javascript
+// 前端自动连接WebSocket日志流
+const socket = io('/logs');
+socket.on('log', (logData) => {
+    console.log(`[${logData.logger}] ${logData.message}`);
+});
+```
+
+### 2. 代码预览与浏览
+
+在Web界面直接预览和浏览生成的代码，无需下载：
+
+- **文件树导航**: 可视化项目文件结构
+- **语法高亮**: 支持15+编程语言 (Python, JavaScript, Go, etc.)
+- **一键复制**: 复制代码到剪贴板
+- **文件类型图标**: 直观识别文件类型
+- **实时更新**: 文件生成后自动刷新
+
+**API端点**:
+- `GET /api/files` - 获取项目文件树
+- `GET /api/files/content?file_path=backend/app.py` - 获取文件内容
+
+### 3. 性能监控与基准测试
+
+全面的性能监控系统，追踪系统运行效率：
+
+- **自动性能收集**: 装饰器自动记录函数执行时间
+- **内存监控**: 追踪内存使用和增量
+- **统计分析**: 平均值、最小值、最大值、成功率
+- **基准测试**: 标准化测试场景
+- **导出报告**: JSON格式性能报告
+
+**使用示例**:
+```python
+from src.utils.performance import performance_monitor
+
+@performance_monitor("my_task")
+async def my_task():
+    # 自动记录执行时间和资源使用
+    pass
+
+# 获取性能摘要
+from src.utils.performance import PerformanceMetrics
+summary = PerformanceMetrics.get_summary()
+```
+
+**API端点**:
+- `GET /api/performance` - 获取性能指标摘要
+- `POST /api/performance/export` - 导出性能报告
+- `POST /api/benchmark/run` - 运行基准测试
+
+### 4. 安全扫描
+
+自动检测生成代码中的常见安全漏洞：
+
+**支持检测的漏洞类型**:
+- ✅ SQL注入 (SQL Injection)
+- ✅ XSS跨站脚本 (Cross-Site Scripting)
+- ✅ 硬编码密钥 (Hardcoded Secrets)
+- ✅ 不安全随机数 (Insecure Random)
+- ✅ 危险函数 (eval, exec)
+- ✅ 路径遍历 (Path Traversal)
+- ✅ 弱加密 (MD5, SHA1)
+- ✅ 命令注入 (Command Injection)
+
+**扫描报告**:
+```json
+{
+  "total_vulnerabilities": 3,
+  "vulnerabilities_by_severity": {
+    "critical": 1,
+    "high": 2,
+    "medium": 0,
+    "low": 0
+  },
+  "vulnerabilities": [
+    {
+      "type": "hardcoded_secret",
+      "severity": "critical",
+      "file_path": "backend/config.py",
+      "line_number": 15,
+      "description": "Hardcoded API key detected",
+      "recommendation": "Use environment variables"
+    }
+  ]
+}
+```
+
+**API端点**:
+- `POST /api/security/scan` - 扫描整个项目
+- `POST /api/security/scan/file` - 扫描单个文件
+
+### 5. 多语言后端支持
+
+支持生成多种后端语言和框架，满足不同技术栈需求：
+
+#### 支持的后端技术栈:
+
+**🐍 Python + Flask** (默认)
+```bash
+export DEVSWARM_BACKEND_LANGUAGE=flask
+```
+- Flask web框架
+- CORS支持
+- JSON数据存储
+- requirements.txt
+
+**🟢 Node.js + Express**
+```bash
+export DEVSWARM_BACKEND_LANGUAGE=nodejs
+```
+- Express.js框架
+- 异步/await支持
+- npm包管理
+- nodemon热重载
+
+**🐹 Go + Gin**
+```bash
+export DEVSWARM_BACKEND_LANGUAGE=go
+```
+- 高性能Gin框架
+- 并发处理
+- Go modules
+- 编译型语言优势
+
+#### 所有后端实现相同的API:
+```
+GET    /api/items      - 获取所有项目
+POST   /api/items      - 创建新项目
+PUT    /api/items/:id  - 更新项目
+DELETE /api/items/:id  - 删除项目
+GET    /health         - 健康检查
+```
+
+#### 生成的项目结构对比:
+
+**Flask**:
+```
+backend/
+├── app.py              # Flask应用
+├── storage.py          # 数据存储
+├── requirements.txt    # Python依赖
+└── README.md
+```
+
+**Node.js/Express**:
+```
+backend/
+├── server.js           # Express服务器
+├── package.json        # npm依赖
+├── .env.example        # 环境变量模板
+└── README.md
+```
+
+**Go/Gin**:
+```
+backend/
+├── main.go             # Go主文件
+├── go.mod              # Go模块定义
+├── .env.example        # 环境变量模板
+└── README.md
+```
+
+### 配置系统
+
+统一的配置管理系统，支持环境变量配置：
+
+```bash
+# 设置后端语言
+export DEVSWARM_BACKEND_LANGUAGE=nodejs  # flask, nodejs, go
+
+# 设置前端框架 (未来支持)
+export DEVSWARM_FRONTEND_FRAMEWORK=react  # vanilla, react, vue
+
+# 设置LLM提供商
+export DEVSWARM_LLM_PROVIDER=openai  # openai, anthropic
+export DEVSWARM_LLM_MODEL=gpt-4
+
+# 工作区配置
+export DEVSWARM_WORKSPACE_ROOT=./workspace
+
+# 功能开关
+export DEVSWARM_ENABLE_PERFORMANCE=true
+export DEVSWARM_ENABLE_SECURITY=true
+
+# 日志级别
+export DEVSWARM_LOG_LEVEL=INFO
+```
+
 ## 📊 监控与调试
 
 ### Web界面功能
