@@ -269,6 +269,100 @@
             font-size: 0.9rem;
             color: #333;
         }
+
+        /* Real-time logs section */
+        .logs-section {
+            margin-top: 30px;
+        }
+
+        .logs-container {
+            background: #1e1e1e;
+            border-radius: 8px;
+            padding: 15px;
+            max-height: 400px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+        }
+
+        .log-entry {
+            padding: 5px 0;
+            border-bottom: 1px solid #333;
+            color: #d4d4d4;
+        }
+
+        .log-entry:last-child {
+            border-bottom: none;
+        }
+
+        .log-timestamp {
+            color: #858585;
+            margin-right: 8px;
+        }
+
+        .log-logger {
+            color: #4ec9b0;
+            margin-right: 8px;
+            font-weight: 600;
+        }
+
+        .log-message {
+            color: #d4d4d4;
+        }
+
+        .log-debug {
+            color: #858585;
+        }
+
+        .log-info {
+            color: #4fc1ff;
+        }
+
+        .log-warning {
+            color: #ffb86c;
+        }
+
+        .log-error {
+            color: #ff5555;
+        }
+
+        .log-critical {
+            color: #ff5555;
+            font-weight: bold;
+        }
+
+        .ws-status {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .ws-connected {
+            background: #4caf50;
+        }
+
+        .ws-disconnected {
+            background: #f44336;
+        }
+
+        .logs-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .logs-controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 0.85rem;
+        }
     </style>
 </head>
 <body>
@@ -311,8 +405,29 @@
                 <h2>Project Summary</h2>
                 <pre id="summary-content"></pre>
             </div>
+
+            <div class="logs-section">
+                <div class="logs-header">
+                    <h2>
+                        <span id="ws-status" class="ws-status ws-disconnected"></span>
+                        Real-time Logs
+                    </h2>
+                    <div class="logs-controls">
+                        <button class="btn btn-small" onclick="clearLogs()">Clear Logs</button>
+                        <button class="btn btn-small" id="autoscroll-btn" onclick="toggleAutoscroll()">Auto-scroll: ON</button>
+                    </div>
+                </div>
+                <div class="logs-container" id="logs-container">
+                    <div class="log-entry log-info">
+                        <span class="log-message">Waiting for log stream connection...</span>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
+
+    <!-- Socket.IO Client -->
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
 
     <script>
         let statusInterval = null;
@@ -468,6 +583,137 @@
                 e.preventDefault();
                 submitRequirement();
             }
+        });
+
+        // ============= WebSocket Real-time Logs =============
+
+        let logSocket = null;
+        let autoscroll = true;
+        const maxLogEntries = 500; // 限制日志条目数量，防止内存溢出
+
+        function initializeLogSocket() {
+            // 连接到WebSocket日志流
+            logSocket = io('/logs', {
+                reconnection: true,
+                reconnectionDelay: 1000,
+                reconnectionAttempts: 5
+            });
+
+            // 连接成功
+            logSocket.on('connect', function() {
+                console.log('Connected to log stream');
+                updateWSStatus(true);
+                addLogEntry({
+                    level: 'INFO',
+                    logger: 'WebSocket',
+                    message: 'Connected to real-time log stream',
+                    timestamp: new Date().toISOString(),
+                    color: 'info'
+                });
+            });
+
+            // 连接断开
+            logSocket.on('disconnect', function() {
+                console.log('Disconnected from log stream');
+                updateWSStatus(false);
+                addLogEntry({
+                    level: 'WARNING',
+                    logger: 'WebSocket',
+                    message: 'Disconnected from log stream',
+                    timestamp: new Date().toISOString(),
+                    color: 'warning'
+                });
+            });
+
+            // 接收日志消息
+            logSocket.on('log', function(data) {
+                addLogEntry(data);
+            });
+
+            // 连接响应
+            logSocket.on('connection_response', function(data) {
+                console.log('Server response:', data);
+            });
+
+            // 连接错误
+            logSocket.on('connect_error', function(error) {
+                console.error('WebSocket connection error:', error);
+                updateWSStatus(false);
+            });
+        }
+
+        function updateWSStatus(connected) {
+            const statusIndicator = document.getElementById('ws-status');
+            if (connected) {
+                statusIndicator.classList.remove('ws-disconnected');
+                statusIndicator.classList.add('ws-connected');
+            } else {
+                statusIndicator.classList.remove('ws-connected');
+                statusIndicator.classList.add('ws-disconnected');
+            }
+        }
+
+        function addLogEntry(logData) {
+            const container = document.getElementById('logs-container');
+
+            // 限制日志条目数量
+            const entries = container.getElementsByClassName('log-entry');
+            if (entries.length >= maxLogEntries) {
+                container.removeChild(entries[0]);
+            }
+
+            // 创建日志条目
+            const logEntry = document.createElement('div');
+            logEntry.className = `log-entry log-${logData.color}`;
+
+            // 格式化时间戳
+            const timestamp = new Date(logData.timestamp).toLocaleTimeString('en-US', {
+                hour12: false,
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+
+            logEntry.innerHTML = `
+                <span class="log-timestamp">[${timestamp}]</span>
+                <span class="log-logger">[${logData.logger}]</span>
+                <span class="log-level">[${logData.level}]</span>
+                <span class="log-message">${escapeHtml(logData.message)}</span>
+            `;
+
+            container.appendChild(logEntry);
+
+            // 自动滚动到底部
+            if (autoscroll) {
+                container.scrollTop = container.scrollHeight;
+            }
+        }
+
+        function clearLogs() {
+            const container = document.getElementById('logs-container');
+            container.innerHTML = '<div class="log-entry log-info"><span class="log-message">Logs cleared</span></div>';
+        }
+
+        function toggleAutoscroll() {
+            autoscroll = !autoscroll;
+            const btn = document.getElementById('autoscroll-btn');
+            btn.textContent = `Auto-scroll: ${autoscroll ? 'ON' : 'OFF'}`;
+        }
+
+        function escapeHtml(text) {
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+        }
+
+        // 页面加载时初始化WebSocket连接
+        window.addEventListener('load', function() {
+            initializeLogSocket();
         });
     </script>
 </body>

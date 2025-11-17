@@ -27,6 +27,7 @@ Web UI Application Module
 """
 from flask import Flask, render_template, request, jsonify
 from flask_cors import CORS
+from flask_socketio import SocketIO, emit
 import asyncio
 import logging
 import sys
@@ -42,6 +43,7 @@ from src.agents.pm_agent import PMAgent
 from src.agents.backend_agent import BackendAgent
 from src.agents.frontend_agent import FrontendAgent
 from src.agents.qa_agent import QAAgent
+from src.utils.websocket_logger import setup_websocket_logging
 
 # Configure logging
 logging.basicConfig(
@@ -53,6 +55,9 @@ logger = logging.getLogger(__name__)
 # Initialize Flask app
 app = Flask(__name__)
 CORS(app)
+
+# Initialize SocketIO for real-time communication
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode='threading')
 
 # Global system components
 message_bus = None
@@ -96,8 +101,49 @@ def initialize_system():
     frontend_agent.start()
     qa_agent.start()
 
+    # 设置WebSocket日志处理器
+    setup_websocket_logging(socketio, min_level=logging.INFO)
+
     logger.info("System initialized successfully!")
 
+
+# ============= WebSocket Event Handlers =============
+
+@socketio.on('connect', namespace='/logs')
+def handle_connect():
+    """
+    处理客户端连接
+    当用户打开Web页面时建立WebSocket连接
+    """
+    logger.info("Client connected to log stream")
+    emit('connection_response', {'data': 'Connected to DevSwarm log stream'})
+
+
+@socketio.on('disconnect', namespace='/logs')
+def handle_disconnect():
+    """
+    处理客户端断开连接
+    当用户关闭页面时断开WebSocket连接
+    """
+    logger.info("Client disconnected from log stream")
+
+
+@socketio.on('request_history', namespace='/logs')
+def handle_history_request(data):
+    """
+    客户端请求历史日志
+    客户端可以请求最近的N条日志记录
+    """
+    limit = data.get('limit', 100)
+    logger.info(f"Client requested last {limit} log entries")
+    # 注意：历史日志需要单独存储，当前实现仅支持实时流
+    emit('history_response', {
+        'message': 'Historical logs not yet implemented',
+        'logs': []
+    })
+
+
+# ============= HTTP Routes =============
 
 @app.route('/')
 def index():
@@ -266,6 +312,6 @@ if __name__ == '__main__':
     # 初始化系统
     initialize_system()
 
-    # 启动Web服务器
-    logger.info("Starting web server on http://localhost:3000")
-    app.run(host='0.0.0.0', port=3000, debug=False)
+    # 启动Web服务器（使用SocketIO）
+    logger.info("Starting web server with WebSocket support on http://localhost:3000")
+    socketio.run(app, host='0.0.0.0', port=3000, debug=False, allow_unsafe_werkzeug=True)

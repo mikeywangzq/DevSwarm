@@ -3,6 +3,8 @@
 # Core
 Flask==2.3.0
 flask-cors==4.0.0
+flask-socketio==5.3.4
+python-socketio==5.9.0
 
 # LLM Integration
 openai>=1.0.0
