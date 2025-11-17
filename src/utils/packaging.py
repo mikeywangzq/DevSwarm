@@ -1,6 +1,22 @@
 """
-Packaging utilities
-打包生成的项目
+项目打包工具模块
+Project Packaging Utilities Module
+
+本模块提供项目打包和部署相关的工具函数，包括：
+- Docker配置文件生成（docker-compose.yml, Dockerfile）
+- README文件生成
+- 项目压缩打包
+
+主要用途:
+    PM Agent在完成所有任务后，使用此模块生成部署文件和文档，
+    将整个项目打包成可交付的格式。
+
+主要函数:
+    - create_docker_compose(): 生成docker-compose.yml
+    - create_backend_dockerfile(): 生成后端Dockerfile
+    - create_frontend_dockerfile(): 生成前端Dockerfile
+    - create_readme(): 生成项目README.md
+    - package_project(): 打包整个项目为zip文件
 """
 import os
 import shutil

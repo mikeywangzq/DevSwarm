@@ -1,6 +1,28 @@
 """
-Backend Agent - 后端开发Agent
-负责实现后端API和服务
+Backend Agent模块 - 后端开发Agent
+Backend Agent Module - Backend Developer
+
+Backend Agent负责根据PM Agent生成的API契约实现后端服务代码。
+使用LLM生成Flask API端点、数据模型和业务逻辑代码。
+
+核心职责:
+    1. **读取API契约**: 从共享状态获取API契约定义
+    2. **生成代码**: 使用LLM生成Flask后端代码
+        - API端点实现
+        - 数据模型定义
+        - 路由配置
+        - requirements.txt依赖文件
+    3. **代码写入**: 将生成的代码写入backend目录
+    4. **Bug修复**: 根据QA反馈修复后端Bug
+
+技术栈:
+    - Flask: Web框架
+    - Python标准库: 数据处理
+    - 文件存储或简单内存存储: 数据持久化
+
+Example:
+    >>> backend = BackendAgent(message_bus, shared_state, llm_client)
+    >>> # 收到PM分配的任务后自动执行
 """
 import os
 from pathlib import Path

@@ -1,6 +1,29 @@
 """
-Frontend Agent - 前端开发Agent
-负责实现前端UI
+Frontend Agent模块 - 前端开发Agent
+Frontend Agent Module - Frontend Developer
+
+Frontend Agent负责根据API契约实现前端用户界面代码。
+使用LLM生成HTML/JavaScript代码，实现与后端API的交互。
+
+核心职责:
+    1. **读取API契约**: 从共享状态获取API契约定义
+    2. **生成UI代码**: 使用LLM生成前端代码
+        - HTML页面结构
+        - JavaScript交互逻辑
+        - CSS样式（内联或外部）
+        - API调用代码（fetch/axios）
+    3. **代码写入**: 将生成的代码写入frontend目录
+    4. **Bug修复**: 根据QA反馈修复前端Bug
+
+技术栈:
+    - HTML5: 页面结构
+    - JavaScript (原生): 交互逻辑
+    - CSS: 样式设计
+    - Fetch API: 后端通信
+
+Example:
+    >>> frontend = FrontendAgent(message_bus, shared_state, llm_client)
+    >>> # 收到PM分配的任务后自动执行
 """
 import os
 from pathlib import Path

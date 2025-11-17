@@ -1,6 +1,30 @@
 """
-PM Agent - 项目经理Agent（编排器）
-负责需求分解、任务分配、协调和监控
+PM Agent模块 - 项目经理Agent（系统编排器）
+PM Agent Module - Project Manager and Orchestrator
+
+PM Agent是DevSwarm系统的"大脑"和协调中心，负责整个项目的规划、任务分配和监控。
+
+核心职责:
+    1. **需求分析**: 使用LLM分析用户需求，生成API契约
+    2. **任务分解**: 将项目分解为具体的开发任务
+    3. **任务分配**: 将任务分配给Backend、Frontend、QA等Worker Agent
+    4. **进度监控**: 跟踪所有任务的执行状态
+    5. **Bug修复**: 接收QA报告的Bug，分析并重新分配修复任务
+    6. **项目打包**: 所有任务完成后打包项目
+
+工作流程:
+    1. 接收用户需求 (start_project)
+    2. 调用LLM分析需求，生成API契约和任务列表
+    3. 初始化共享状态，创建项目目录
+    4. 分配任务给各个Worker Agent
+    5. 监听任务完成/失败消息
+    6. 处理Bug报告，生成修复任务
+    7. 所有任务完成后，打包项目
+
+Example:
+    >>> pm = PMAgent(message_bus, shared_state, llm_client)
+    >>> project_id = await pm.start_project("创建待办事项应用")
+    >>> # PM Agent会自动分解需求并分配任务
 """
 import json
 import uuid

@@ -1,6 +1,29 @@
 """
-Web UI Application
-提供用户界面用于提交需求和监控项目进度
+Web用户界面应用
+Web UI Application Module
+
+本模块实现了DevSwarm系统的Web用户界面，基于Flask框架。
+用户通过Web界面提交需求、监控项目进度、查看生成的代码。
+
+主要功能:
+    1. **需求提交**: 用户通过Web表单提交需求
+    2. **进度监控**: 实时显示项目和任务状态
+    3. **日志查看**: 展示系统运行日志和Agent活动
+    4. **结果下载**: 提供生成代码的下载链接
+
+路由说明:
+    - /: 主页，显示提交表单
+    - /api/generate: 接收需求并启动项目生成
+    - /api/status: 查询项目状态
+    - /api/logs: 获取系统日志
+
+系统初始化:
+    应用启动时会初始化所有核心组件（消息总线、共享状态、LLM客户端）
+    和所有Agent（PM、Backend、Frontend、QA），并启动消息总线。
+
+使用方式:
+    python src/web/app.py
+    然后访问: http://localhost:3000
 """
 from flask import Flask, render_template, request, jsonify
 from flask_cors import CORS

@@ -1,6 +1,33 @@
 """
-QA Agent - 质量保证Agent
-负责测试和Bug检测
+QA Agent模块 - 质量保证Agent
+QA Agent Module - Quality Assurance Engineer
+
+QA Agent负责对生成的代码进行自动化测试，检测Bug并报告给PM Agent。
+实现DevSwarm系统的自愈能力（self-healing）。
+
+核心职责:
+    1. **启动服务**: 启动后端Flask服务器
+    2. **执行测试**: 根据API契约自动生成和执行测试用例
+        - API端点可用性测试
+        - 数据正确性验证
+        - HTTP状态码检查
+    3. **Bug检测**: 捕获测试失败和异常
+    4. **Bug报告**: 将Bug信息（错误消息、日志、代码上下文）报告给PM Agent
+    5. **验证修复**: 重新测试验证Bug是否已修复
+
+测试流程:
+    1. 从共享状态获取API契约
+    2. 启动后端服务（subprocess）
+    3. 遍历所有API端点执行测试
+    4. 收集测试结果
+    5. 如有失败，生成BugReport发送给PM Agent
+
+自愈机制:
+    PM Agent收到Bug报告 → 分析原因 → 生成修复任务 → 重新分配给Worker Agent
+
+Example:
+    >>> qa = QAAgent(message_bus, shared_state, llm_client)
+    >>> # 收到PM分配的测试任务后自动执行
 """
 import subprocess
 import time
