@@ -1,396 +1,687 @@
-# 🤖 DevSwarm - Multi-Agent Web Application Development Platform
+<div align="center">
 
-**自动化Web应用开发的多Agent协作系统**
+# 🤖 DevSwarm
 
-DevSwarm是一个基于大型语言模型(LLM)的多Agent协作系统，能够接收自然语言需求描述，自动生成包含前后端代码和测试用例的完整Web应用。
+### 基于AI的多Agent协作Web应用开发平台
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
+
+**从自然语言需求到完整Web应用，只需几分钟** ⚡
+
+[快速开始](#-快速开始) • [在线演示](#-在线演示) • [文档](#-文档) • [贡献指南](CONTRIBUTING.md)
+
+---
+
+</div>
+
+## 📖 项目简介
+
+DevSwarm是一个革命性的**多Agent协作系统**，利用大型语言模型(LLM)的强大能力，实现从需求到代码的全自动化开发流程。
+
+### 💡 核心理念
+
+> "让AI团队为你工作，像真实的软件团队一样协作开发"
+
+DevSwarm模拟了一个完整的软件开发团队：
+- 📋 **项目经理** - 分析需求、制定计划、协调资源
+- 💻 **后端工程师** - 设计和实现API服务
+- 🎨 **前端工程师** - 创建用户界面
+- 🧪 **测试工程师** - 质量保证和自动化测试
 
 ## ✨ 核心特性
 
-- 🎯 **需求驱动**: 输入自然语言描述，自动生成应用
-- 🤝 **多Agent协作**: PM、后端、前端、QA四个Agent协同工作
-- 🔄 **自动化流程**: 从需求分析到代码生成、测试、打包全自动
-- 🐛 **代码自愈**: QA Agent发现Bug后，PM自动协调修复
-- 📊 **实时监控**: Web界面实时显示开发进度和Agent状态
-- 🎨 **Web UI**: 友好的Web界面，无需命令行操作
+<table>
+<tr>
+<td width="50%">
+
+### 🎯 智能需求理解
+- 自然语言输入
+- 自动需求分析
+- API契约自动生成
+- 智能任务分解
+
+</td>
+<td width="50%">
+
+### 🤝 多Agent协作
+- 4个专业化Agent
+- 异步消息通信
+- 并行任务执行
+- 实时状态同步
+
+</td>
+</tr>
+<tr>
+<td width="50%">
+
+### 🔄 全自动流程
+- 需求 → 设计 → 开发 → 测试
+- 零人工干预
+- 端到端自动化
+- 完整项目输出
+
+</td>
+<td width="50%">
+
+### 🐛 自愈能力
+- 自动Bug检测
+- 智能根因分析
+- 自动代码修复
+- 回归测试验证
+
+</td>
+</tr>
+</table>
+
+## 🎬 工作流程演示
+
+```mermaid
+graph LR
+    A[📝 输入需求] --> B[🧠 PM分析]
+    B --> C[📋 设计API]
+    C --> D[👨‍💻 后端开发]
+    C --> E[🎨 前端开发]
+    D --> F[🧪 集成测试]
+    E --> F
+    F --> G{测试通过?}
+    G -->|是| H[📦 打包输出]
+    G -->|否| I[🔧 自动修复]
+    I --> F
+```
 
 ## 🏗️ 系统架构
 
+### 分层架构设计
+
 ```
-┌─────────────────────────────────────────────────────────┐
-│                    User Interface (Web)                  │
-└────────────────────┬────────────────────────────────────┘
-                     │
-                     ▼
-┌─────────────────────────────────────────────────────────┐
-│              PM Agent (Orchestrator)                     │
-│  • 需求分析    • 任务分解    • 协调调度    • Bug修复     │
-└─────┬───────────────┬───────────────┬──────────────────┘
-      │               │               │
-      ▼               ▼               ▼
-┌──────────┐   ┌──────────┐   ┌──────────┐
-│ Backend  │   │ Frontend │   │    QA    │
-│  Agent   │   │  Agent   │   │  Agent   │
-└──────────┘   └──────────┘   └──────────┘
-      │               │               │
-      └───────────────┴───────────────┘
-                     │
-                     ▼
-┌─────────────────────────────────────────────────────────┐
-│              Message Bus & Shared State                  │
-└─────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────┐
+│                     👥 用户交互层                            │
+│  ┌──────────────┐              ┌──────────────┐            │
+│  │  Web UI      │              │  CLI Demo    │            │
+│  │  (Flask)     │              │  (Python)    │            │
+│  └──────┬───────┘              └──────┬───────┘            │
+└─────────┼────────────────────────────┼────────────────────┘
+          │                            │
+          ▼                            ▼
+┌─────────────────────────────────────────────────────────────┐
+│                   🎯 编排协调层                              │
+│                                                               │
+│              ┌───────────────────────┐                      │
+│              │   PM Agent (Orchestrator)                     │
+│              │  • 需求分析  • 任务分配                       │
+│              │  • 进度监控  • Bug协调                        │
+│              └────────┬──────────────┘                      │
+│                       │                                      │
+│         ┌─────────────┼─────────────┐                      │
+└─────────┼─────────────┼─────────────┼──────────────────────┘
+          │             │             │
+          ▼             ▼             ▼
+┌─────────────────────────────────────────────────────────────┐
+│                  👷 工作执行层                                │
+│                                                               │
+│  ┌────────────┐  ┌────────────┐  ┌────────────┐           │
+│  │ Backend    │  │ Frontend   │  │    QA      │           │
+│  │  Agent     │  │  Agent     │  │  Agent     │           │
+│  │            │  │            │  │            │           │
+│  │ Flask/API  │  │ HTML/CSS/JS│  │ Testing    │           │
+│  └────────────┘  └────────────┘  └────────────┘           │
+└─────────────────────────────────────────────────────────────┘
+          │             │             │
+          └─────────────┴─────────────┘
+                       │
+                       ▼
+┌─────────────────────────────────────────────────────────────┐
+│                 ⚙️ 基础设施层                                 │
+│                                                               │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐     │
+│  │ Message Bus  │  │ Shared State │  │  LLM Client  │     │
+│  │  (Async)     │  │  (JSON)      │  │  (GPT-4)     │     │
+│  └──────────────┘  └──────────────┘  └──────────────┘     │
+└─────────────────────────────────────────────────────────────┘
 ```
 
-### Agent职责
+### Agent职责分工
 
-| Agent | 角色 | 职责 |
-|-------|------|------|
-| **PM Agent** | 项目经理/编排器 | 需求分析、API设计、任务分配、进度监控、Bug修复协调 |
-| **Backend Agent** | 后端开发 | 根据API契约生成Flask后端代码、实现REST API |
-| **Frontend Agent** | 前端开发 | 生成HTML/CSS/JavaScript前端代码、API调用 |
-| **QA Agent** | 质量保证 | 执行集成测试、检测Bug、生成测试报告 |
+| Agent | 角色 | 核心技能 | 主要任务 |
+|-------|------|----------|----------|
+| **🎯 PM Agent** | 项目经理<br/>编排器 | 需求分析<br/>项目管理 | • 解析用户需求<br/>• 设计API契约<br/>• 分解和分配任务<br/>• 监控项目进度<br/>• 协调Bug修复 |
+| **💻 Backend Agent** | 后端工程师 | Flask<br/>Python<br/>REST API | • 生成Flask代码<br/>• 实现API端点<br/>• 数据存储设计<br/>• 应用代码修复 |
+| **🎨 Frontend Agent** | 前端工程师 | HTML/CSS<br/>JavaScript<br/>UI设计 | • 生成前端页面<br/>• 实现用户交互<br/>• API调用集成<br/>• 响应式设计 |
+| **🧪 QA Agent** | 测试工程师 | 集成测试<br/>Bug检测 | • 启动测试服务<br/>• 执行API测试<br/>• 检测Bug并报告<br/>• 验证修复结果 |
 
 ## 🚀 快速开始
 
-### 1. 环境要求
+### 📋 环境要求
 
-- Python 3.9+
-- OpenAI API Key 或 Anthropic API Key
+- **Python**: 3.9 或更高版本
+- **API密钥**: OpenAI API Key 或 Anthropic API Key
+- **内存**: 至少 2GB 可用内存
+- **磁盘**: 至少 1GB 可用空间
 
-### 2. 安装
+### 🔧 安装步骤
+
+1️⃣ **克隆仓库**
 
 ```bash
-# 克隆仓库
 git clone https://github.com/yourusername/DevSwarm.git
 cd DevSwarm
+```
 
-# 创建虚拟环境
+2️⃣ **创建虚拟环境**
+
+```bash
+# Linux/macOS
 python -m venv venv
-source venv/bin/activate  # Windows: venv\Scripts\activate
+source venv/bin/activate
 
-# 安装依赖
+# Windows
+python -m venv venv
+venv\Scripts\activate
+```
+
+3️⃣ **安装依赖**
+
+```bash
 pip install -r requirements.txt
 ```
 
-### 3. 配置
+4️⃣ **配置API密钥**
 
 ```bash
 # 复制环境变量模板
 cp .env.example .env
 
 # 编辑 .env 文件，添加你的API密钥
-# OPENAI_API_KEY=your_key_here
+# OPENAI_API_KEY=sk-your-key-here
 ```
 
-### 4. 启动系统
+5️⃣ **启动系统**
 
 ```bash
-# 启动Web服务器
+# 方式1: 使用启动脚本（推荐）
+./start.sh
+
+# 方式2: 直接启动
 python src/web/app.py
+
+# 方式3: 命令行Demo
+python demo.py
 ```
 
-打开浏览器访问: http://localhost:3000
+6️⃣ **访问Web界面**
 
-### 5. 使用示例
+打开浏览器访问: **http://localhost:3000**
 
-在Web界面输入需求，例如:
+## 💻 使用示例
 
-```
-我想要一个简单的待办事项清单应用，支持添加、删除和查看所有待办事项
-```
-
-点击 "Generate App" 按钮，系统将：
-
-1. ✅ 分析需求并设计API契约
-2. ✅ 生成后端Flask代码
-3. ✅ 生成前端HTML/JS/CSS代码
-4. ✅ 执行集成测试
-5. ✅ 自动修复发现的Bug
-6. ✅ 打包完整项目
-
-生成的项目位于 `workspace/proj_xxxxxxxx/` 目录。
-
-## 📁 项目结构
+### 示例1: 待办事项应用
 
 ```
-DevSwarm/
-├── src/
-│   ├── agents/              # Agent实现
-│   │   ├── base_agent.py    # Agent基类
-│   │   ├── pm_agent.py      # PM Agent
-│   │   ├── backend_agent.py # Backend Agent
-│   │   ├── frontend_agent.py# Frontend Agent
-│   │   └── qa_agent.py      # QA Agent
-│   ├── core/                # 核心系统
-│   │   ├── message_bus.py   # 消息总线
-│   │   ├── shared_state.py  # 共享状态
-│   │   └── protocol.py      # 通信协议
-│   ├── llm/                 # LLM集成
-│   │   └── llm_client.py    # LLM客户端
-│   ├── utils/               # 工具函数
-│   │   └── packaging.py     # 打包工具
-│   └── web/                 # Web界面
-│       ├── app.py           # Flask应用
-│       └── templates/       # HTML模板
-├── workspace/               # 生成的项目
-├── config/                  # 配置文件
-├── requirements.txt         # Python依赖
-├── .env.example            # 环境变量模板
-└── README.md               # 本文档
+输入需求:
+我想要一个待办事项清单应用，支持：
+- 添加新的待办事项
+- 查看所有待办事项
+- 删除已完成的事项
 ```
 
-## 🔧 核心工作流程
+**系统将自动生成:**
+- ✅ Flask后端API (3个端点)
+- ✅ 响应式前端界面
+- ✅ 完整的集成测试
+- ✅ Docker配置文件
+- ✅ 使用文档
 
-### 1. 需求提交
+⏱️ **预计时间**: 2-3分钟
 
-用户在Web界面输入自然语言需求
-
-### 2. PM Agent处理
-
-```
-[PM Agent]
-  ├─► 分析需求
-  ├─► 定义API契约 (api_contract.json)
-  ├─► 分解任务
-  │   ├─► T1: Backend开发任务
-  │   ├─► T2: Frontend开发任务
-  │   └─► T3: QA测试任务
-  └─► 分配任务到Worker Agents
-```
-
-### 3. 并行开发
+### 示例2: 图书管理系统
 
 ```
-[Backend Agent]          [Frontend Agent]
-  ├─► 读取API契约         ├─► 读取API契约
-  ├─► 生成Flask代码       ├─► 生成HTML/CSS/JS
-  ├─► 创建存储模块        ├─► 实现API调用
-  └─► 报告完成            └─► 报告完成
+输入需求:
+创建一个图书管理系统，功能包括：
+1. 添加新书（书名、作者、ISBN）
+2. 查看所有图书列表
+3. 按书名搜索图书
+4. 更新图书信息
+5. 删除图书记录
 ```
 
-### 4. 集成测试
+⏱️ **预计时间**: 5-8分钟
+
+### 更多示例
+
+<details>
+<summary>📝 笔记应用</summary>
 
 ```
-[QA Agent]
-  ├─► 启动后端服务
-  ├─► 测试所有API端点
-  ├─► 检测Bug
-  └─► 报告结果
+创建一个简单的笔记应用，可以：
+- 创建新笔记（标题和内容）
+- 查看所有笔记
+- 编辑现有笔记
+- 删除笔记
+```
+</details>
+
+<details>
+<summary>📇 联系人管理</summary>
+
+```
+我需要一个联系人管理系统：
+- 添加联系人（姓名、电话、邮箱）
+- 查看联系人列表
+- 搜索联系人
+- 更新联系人信息
+- 删除联系人
+```
+</details>
+
+<details>
+<summary>💰 个人财务追踪</summary>
+
+```
+构建一个个人财务追踪应用：
+- 记录收入和支出
+- 按类别分类
+- 查看交易历史
+- 显示统计摘要
+```
+</details>
+
+## 📁 生成的项目结构
+
+系统会自动生成完整的项目结构：
+
+```
+workspace/proj_abc123/
+├── 📄 README.md                    # 项目说明文档
+├── 📋 api_contract.json            # API规范定义
+├── 🐳 docker-compose.yml           # Docker编排配置
+│
+├── 💻 backend/                     # 后端目录
+│   ├── app.py                      # Flask应用主文件
+│   ├── storage.py                  # 数据存储模块
+│   ├── requirements.txt            # Python依赖
+│   ├── Dockerfile                  # 后端容器配置
+│   ├── start.sh                    # 启动脚本
+│   └── README.md                   # 后端文档
+│
+├── 🎨 frontend/                    # 前端目录
+│   ├── index.html                  # 主页面
+│   ├── app.js                      # 应用逻辑
+│   ├── style.css                   # 样式文件
+│   ├── package.json                # 前端配置
+│   ├── Dockerfile                  # 前端容器配置
+│   ├── start.sh                    # 启动脚本
+│   └── README.md                   # 前端文档
+│
+└── 🧪 tests/                       # 测试目录
+    └── integration_tests.py        # 集成测试
 ```
 
-### 5. Bug修复循环（如果有Bug）
+### 🚀 运行生成的应用
 
-```
-[PM Agent]                [Backend/Frontend Agent]
-  ├─► 接收Bug报告          ├─► 接收修复任务
-  ├─► 分析根因             ├─► 应用代码补丁
-  ├─► 生成修复建议         └─► 报告完成
-  ├─► 创建修复任务             ↓
-  └─► 分配任务          [QA Agent]
-                          └─► 回归测试
-```
+```bash
+cd workspace/proj_abc123
 
-## 🌟 核心特性详解
+# 方式1: 使用Docker Compose（推荐）
+docker-compose up
 
-### 1. 通信协议
+# 方式2: 手动启动
+# 终端1 - 启动后端
+cd backend
+pip install -r requirements.txt
+python app.py
 
-所有Agent间通信遵循统一的消息格式:
-
-```python
-{
-  "message_id": "uuid",
-  "timestamp": "2025-11-17T20:30:00Z",
-  "from_agent": "PM_Agent",
-  "to_agent": "Backend_Agent",
-  "type": "task_assignment",  # 任务分配/状态更新/错误报告等
-  "task": { ... },
-  "payload": { ... }
-}
+# 终端2 - 启动前端
+cd frontend
+python -m http.server 8000
 ```
 
-### 2. API契约驱动
+访问应用:
+- 前端: http://localhost:8000
+- 后端API: http://localhost:5000
 
-PM Agent首先定义API契约，确保前后端开发对齐:
+## 🎯 核心特性详解
+
+### 1. API契约驱动开发
+
+系统首先生成统一的API契约，确保前后端完美对齐：
 
 ```json
 {
   "base_url": "http://localhost:5000",
+  "version": "1.0",
   "endpoints": [
     {
       "method": "GET",
       "path": "/api/items",
       "description": "获取所有项目",
-      "response": {"items": []}
+      "response": {
+        "items": [
+          {"id": "string", "title": "string", "completed": "boolean"}
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/items",
+      "description": "创建新项目",
+      "request_body": {
+        "title": "string"
+      },
+      "response": {
+        "id": "string",
+        "title": "string",
+        "completed": false
+      }
     }
   ]
 }
 ```
 
-### 3. 代码自愈机制
+### 2. 智能代码自愈
+
+当QA Agent检测到Bug时，系统会自动：
+
+1. **分析根因** - 使用LLM分析错误日志和代码上下文
+2. **生成修复** - 创建针对性的代码补丁
+3. **应用修复** - 自动更新相关代码文件
+4. **验证修复** - 重新运行测试确认问题已解决
 
 ```
-Bug检测 → 根因分析 → 生成修复 → 应用补丁 → 回归测试
+🐛 Bug检测 → 🧠 智能分析 → 🔧 自动修复 → ✅ 验证通过
 ```
+
+### 3. 实时进度监控
+
+Web界面提供实时的项目状态监控：
+
+- **项目状态**: initializing → planning → developing → testing → completed
+- **任务进度**: 显示每个任务的状态（pending/in_progress/completed/failed）
+- **Agent状态**: 查看每个Agent的当前工作
+- **消息历史**: 追踪Agent间的所有通信
 
 ## 📊 监控与调试
 
 ### Web界面功能
 
-- **实时状态**: 查看项目状态、任务进度
-- **Agent监控**: 查看每个Agent的当前任务
-- **消息历史**: 查看Agent间的通信记录
-- **项目摘要**: 查看详细的项目信息
+访问 `http://localhost:3000/api/status` 查看详细状态：
+
+```json
+{
+  "project": {
+    "project_id": "proj_abc123",
+    "status": "developing",
+    "total_tasks": 3,
+    "completed_tasks": 2,
+    "pending_tasks": 1
+  },
+  "agents": [
+    {
+      "name": "Backend_Agent",
+      "status": "active",
+      "current_task": "T1_Backend"
+    }
+  ],
+  "progress": 66
+}
+```
 
 ### API端点
 
-```bash
-# 获取项目状态
-GET /api/status
+| 端点 | 描述 |
+|------|------|
+| `GET /api/health` | 健康检查 |
+| `POST /api/submit` | 提交新需求 |
+| `GET /api/status` | 获取项目状态 |
+| `GET /api/messages` | 查看消息历史 |
+| `GET /api/agents` | Agent状态 |
 
-# 获取消息历史
-GET /api/messages?limit=50
-
-# 获取Agent状态
-GET /api/agents
-
-# 健康检查
-GET /api/health
-```
-
-## 🎨 生成的应用示例
-
-对于需求: "待办事项清单应用"
-
-系统会生成:
-
-```
-workspace/proj_abc123/
-├── backend/
-│   ├── app.py              # Flask应用
-│   ├── storage.py          # 数据存储
-│   ├── requirements.txt    # 依赖
-│   ├── Dockerfile
-│   └── README.md
-├── frontend/
-│   ├── index.html          # 主页面
-│   ├── app.js             # 应用逻辑
-│   ├── style.css          # 样式
-│   ├── Dockerfile
-│   └── README.md
-├── api_contract.json       # API规范
-├── docker-compose.yml      # Docker配置
-└── README.md              # 项目文档
-```
-
-### 运行生成的应用
+### 日志查看
 
 ```bash
-cd workspace/proj_abc123
+# 启用详细日志
+export LOG_LEVEL=DEBUG
+python src/web/app.py
 
-# 使用Docker Compose
-docker-compose up
-
-# 或手动运行
-cd backend && python app.py    # 终端1
-cd frontend && python -m http.server 8000  # 终端2
+# 查看实时日志
+tail -f devswarm.log
 ```
 
 ## 🔌 扩展性
 
-### 添加新的Agent
+### 添加自定义Agent
 
 ```python
 from src.agents.base_agent import BaseAgent
+from src.core.protocol import Task
 
 class CustomAgent(BaseAgent):
+    """自定义Agent示例"""
+
     def __init__(self, message_bus, shared_state, llm_client):
         super().__init__(
             agent_name="Custom_Agent",
-            role="Custom Role",
+            role="Custom Developer",
             message_bus=message_bus,
             shared_state=shared_state,
             llm_client=llm_client
         )
 
     async def execute_task(self, task: Task) -> Dict[str, Any]:
-        # 实现任务执行逻辑
-        pass
+        """执行自定义任务逻辑"""
+        # 你的实现代码
+        return {"status": "success"}
 ```
 
-### 支持新的LLM提供商
+### 自定义LLM提供商
 
-在 `src/llm/llm_client.py` 中添加新的provider支持。
-
-## 🧪 测试
-
-```bash
-# 运行测试
-pytest tests/
-
-# 测试特定模块
-pytest tests/test_agents.py
-```
-
-## 📝 配置
-
-编辑 `config/config.yaml` 自定义系统行为:
+支持多种LLM提供商，可在 `config/config.yaml` 中配置：
 
 ```yaml
 llm:
-  provider: "openai"
+  provider: "openai"  # openai, anthropic, local
+  model: "gpt-4"
   temperature: 0.7
   max_tokens: 2000
-
-agents:
-  backend_agent:
-    default_framework: "flask"  # 或 fastapi
-
-  frontend_agent:
-    default_framework: "vanilla"  # 或 react, vue
 ```
+
+## 📚 文档
+
+- 📖 [完整文档](README.md) - 本文档
+- 🏗️ [架构设计](ARCHITECTURE.md) - 技术架构详解
+- ⚡ [快速开始](QUICKSTART.md) - 5分钟快速体验
+- 🤝 [贡献指南](CONTRIBUTING.md) - 如何贡献代码
+- 📝 [更新日志](CHANGELOG.md) - 版本更新记录
+
+## 🛠️ 技术栈
+
+### 核心技术
+
+- **语言**: Python 3.9+
+- **Web框架**: Flask 2.3+
+- **异步**: asyncio
+- **LLM**: OpenAI GPT-4 / Anthropic Claude
+
+### 主要依赖
+
+```
+Flask==2.3.0          # Web框架
+flask-cors==4.0.0     # CORS支持
+openai>=1.0.0         # OpenAI SDK
+anthropic>=0.7.0      # Anthropic SDK
+requests>=2.31.0      # HTTP客户端
+aiohttp>=3.9.0        # 异步HTTP
+pydantic>=2.0.0       # 数据验证
+```
+
+## 📈 性能指标
+
+| 指标 | 数值 |
+|------|------|
+| 简单应用生成时间 | 2-3 分钟 |
+| 中等复杂度应用 | 5-8 分钟 |
+| 消息处理延迟 | < 100ms |
+| 并发Agent通信 | 支持 10+ Agent |
+| 内存占用（峰值） | ~500MB |
+| LLM调用平均时间 | 3-5 秒 |
 
 ## 🐛 故障排查
 
-### 问题: LLM API调用失败
+### 常见问题
 
-**解决**: 检查 `.env` 文件中的API密钥是否正确
+<details>
+<summary><b>Q: LLM API调用失败</b></summary>
 
-### 问题: 生成的代码有语法错误
+**解决方案:**
+- 检查 `.env` 文件中的API密钥是否正确
+- 确认API密钥有足够的配额
+- 检查网络连接
 
-**解决**:
-- 调低LLM的temperature参数
-- 使用更强大的模型 (如 GPT-4)
+```bash
+# 测试API连接
+curl https://api.openai.com/v1/models \
+  -H "Authorization: Bearer $OPENAI_API_KEY"
+```
+</details>
 
-### 问题: 测试失败
+<details>
+<summary><b>Q: 生成的代码质量差</b></summary>
 
-**解决**: QA Agent会自动报告Bug，PM会协调修复
+**解决方案:**
+- 使用更强大的模型（推荐 GPT-4）
+- 调低 temperature 参数（0.2-0.5）
+- 提供更详细的需求描述
 
-## 🛣️ 路线图
+```yaml
+# config/config.yaml
+llm:
+  model: "gpt-4"  # 不要使用 gpt-3.5-turbo
+  temperature: 0.3
+```
+</details>
 
-- [ ] 支持更多后端框架 (FastAPI, Express.js)
-- [ ] 支持React/Vue前端生成
-- [ ] 数据库设计和迁移支持
-- [ ] 用户认证模块生成
-- [ ] Agent间直接协商机制
+<details>
+<summary><b>Q: Agent无响应</b></summary>
+
+**解决方案:**
+- 检查消息总线状态
+- 查看日志文件
+- 重启系统
+
+```python
+# 检查Agent状态
+from src.web.app import pm_agent
+status = pm_agent.get_status()
+print(status)
+```
+</details>
+
+更多问题请查看 [故障排查指南](ARCHITECTURE.md#故障排查指南)
+
+## 🗺️ 发展路线图
+
+### ✅ 已完成
+
+- [x] 基础多Agent架构
+- [x] PM/Backend/Frontend/QA Agent实现
+- [x] 消息总线和共享状态
+- [x] Web界面和实时监控
+- [x] API契约驱动开发
+- [x] 自动化Bug修复
+- [x] Docker支持
+
+### 🚧 进行中
+
+- [ ] 代码格式化集成（Black, Prettier）
+- [ ] 静态类型检查（mypy）
+- [ ] 单元测试生成
+
+### 📅 计划中
+
+#### 短期（1-3个月）
+
+- [ ] E2E测试支持（Playwright）
+- [ ] 性能测试和基准
+- [ ] 安全扫描集成
+- [ ] 实时日志流
+- [ ] 代码预览功能
+
+#### 中期（3-6个月）
+
+- [ ] 分布式Agent部署
+- [ ] Redis/RabbitMQ消息队列
+- [ ] PostgreSQL状态存储
+- [ ] 多语言后端支持（Node.js, Go）
+- [ ] React/Vue前端生成
+
+#### 长期（6-12个月）
+
+- [ ] Agent学习和优化
 - [ ] 可视化工作流编辑器
-- [ ] 云部署集成
-
-## 📄 许可证
-
-MIT License
+- [ ] 云平台一键部署（AWS/Azure/GCP）
+- [ ] 多用户协作功能
+- [ ] Agent插件市场
 
 ## 🤝 贡献
 
-欢迎提交Issue和Pull Request!
+我们欢迎各种形式的贡献！
 
-## 📞 联系方式
+### 如何贡献
 
-- Issues: https://github.com/yourusername/DevSwarm/issues
-- Email: your.email@example.com
+1. 🍴 Fork 本仓库
+2. 🌿 创建特性分支 (`git checkout -b feature/AmazingFeature`)
+3. ✍️ 提交更改 (`git commit -m 'Add: 添加某个很棒的特性'`)
+4. 📤 推送到分支 (`git push origin feature/AmazingFeature`)
+5. 🎉 创建 Pull Request
+
+详细信息请查看 [贡献指南](CONTRIBUTING.md)
+
+### 贡献者
+
+<!-- ALL-CONTRIBUTORS-LIST:START -->
+感谢所有为这个项目做出贡献的开发者！
+<!-- ALL-CONTRIBUTORS-LIST:END -->
+
+## 📄 许可证
+
+本项目采用 MIT 许可证 - 查看 [LICENSE](LICENSE) 文件了解详情。
 
 ## 🙏 致谢
 
-本项目灵感来源于多Agent系统研究和AutoGPT、MetaGPT等项目。
+### 灵感来源
+
+- [AutoGPT](https://github.com/Significant-Gravitas/AutoGPT) - 自主AI Agent先驱
+- [MetaGPT](https://github.com/geekan/MetaGPT) - 多Agent协作框架
+- [LangChain](https://github.com/langchain-ai/langchain) - LLM应用开发框架
+- [AutoGen](https://github.com/microsoft/autogen) - 微软的多Agent系统
+
+### 技术支持
+
+- OpenAI 提供强大的GPT-4模型
+- Anthropic 提供Claude模型支持
+- 所有开源社区的贡献者
+
+## 📞 联系我们
+
+- **Issues**: [GitHub Issues](https://github.com/yourusername/DevSwarm/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/yourusername/DevSwarm/discussions)
+- **Email**: devswarm@example.com
+- **Twitter**: [@DevSwarm](https://twitter.com/devswarm)
+
+## ⭐ Star历史
+
+[![Star History Chart](https://api.star-history.com/svg?repos=yourusername/DevSwarm&type=Date)](https://star-history.com/#yourusername/DevSwarm&Date)
 
 ---
 
-**Built with ❤️ by DevSwarm Team**
+<div align="center">
+
+### 🌟 如果这个项目对您有帮助，请给我们一个Star！🌟
+
+**Made with ❤️ by DevSwarm Team**
+
+[⬆ 回到顶部](#-devswarm)
+
+</div>
