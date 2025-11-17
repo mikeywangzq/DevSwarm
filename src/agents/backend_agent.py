@@ -30,6 +30,8 @@ from typing import Dict, Any
 import logging
 from .base_agent import BaseAgent
 from ..core.protocol import Task, APIContract
+from ..code_gen.backend_templates import generate_backend
+from ..config.settings import get_config
 
 logger = logging.getLogger(__name__)
 
@@ -85,7 +87,7 @@ class BackendAgent(BaseAgent):
     async def _generate_backend_code(self, api_contract: APIContract,
                                     backend_dir: Path) -> Dict[str, Any]:
         """
-        生成后端代码
+        生成后端代码（支持多语言）
 
         Args:
             api_contract: API契约
@@ -94,53 +96,45 @@ class BackendAgent(BaseAgent):
         Returns:
             生成结果
         """
-        logger.info("Generating backend code with Flask...")
+        # 获取配置的后端语言
+        config = get_config()
+        backend_language = config.backend_language
 
-        # 生成主应用文件
-        app_code = await self._generate_flask_app(api_contract)
-        app_file = backend_dir / "app.py"
-        with open(app_file, 'w', encoding='utf-8') as f:
-            f.write(app_code)
-        logger.info(f"Generated: {app_file}")
+        logger.info(f"Generating backend code with {backend_language}...")
 
-        # 生成数据存储模块
-        storage_code = self._generate_storage_module()
-        storage_file = backend_dir / "storage.py"
-        with open(storage_file, 'w', encoding='utf-8') as f:
-            f.write(storage_code)
-        logger.info(f"Generated: {storage_file}")
+        # 使用模板生成器生成代码
+        api_contract_dict = api_contract.to_dict()
+        generated_files = generate_backend(api_contract_dict, language=backend_language)
 
-        # 生成requirements.txt
-        requirements = self._generate_requirements()
-        req_file = backend_dir / "requirements.txt"
-        with open(req_file, 'w', encoding='utf-8') as f:
-            f.write(requirements)
-        logger.info(f"Generated: {req_file}")
+        # 写入所有生成的文件
+        files_generated = []
+        for file_path, content in generated_files.items():
+            full_path = backend_dir / file_path
+            full_path.parent.mkdir(parents=True, exist_ok=True)
 
-        # 生成README
-        readme = self._generate_backend_readme(api_contract)
-        readme_file = backend_dir / "README.md"
-        with open(readme_file, 'w', encoding='utf-8') as f:
-            f.write(readme)
-        logger.info(f"Generated: {readme_file}")
+            with open(full_path, 'w', encoding='utf-8') as f:
+                f.write(content)
 
-        # 生成启动脚本
-        start_script = self._generate_start_script()
-        script_file = backend_dir / "start.sh"
-        with open(script_file, 'w', encoding='utf-8') as f:
-            f.write(start_script)
-        os.chmod(script_file, 0o755)
-        logger.info(f"Generated: {script_file}")
+            # 如果是脚本文件，添加执行权限
+            if file_path.endswith('.sh'):
+                os.chmod(full_path, 0o755)
+
+            logger.info(f"Generated: {full_path}")
+            files_generated.append(str(full_path))
+
+        # 对于Flask后端，还需要生成storage模块
+        if backend_language in ['flask', 'python']:
+            storage_code = self._generate_storage_module()
+            storage_file = backend_dir / "storage.py"
+            with open(storage_file, 'w', encoding='utf-8') as f:
+                f.write(storage_code)
+            logger.info(f"Generated: {storage_file}")
+            files_generated.append(str(storage_file))
 
         return {
             "status": "success",
-            "files_generated": [
-                str(app_file),
-                str(storage_file),
-                str(req_file),
-                str(readme_file),
-                str(script_file)
-            ],
+            "backend_language": backend_language,
+            "files_generated": files_generated,
             "output_path": str(backend_dir)
         }
 
