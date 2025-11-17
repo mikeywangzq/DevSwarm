@@ -46,6 +46,7 @@ from src.agents.frontend_agent import FrontendAgent
 from src.agents.qa_agent import QAAgent
 from src.utils.websocket_logger import setup_websocket_logging
 from src.utils.performance import PerformanceMetrics, BenchmarkSuite
+from src.utils.security_scanner import SecurityScanner
 
 # Configure logging
 logging.basicConfig(
@@ -377,6 +378,104 @@ def run_benchmark():
 
     except Exception as e:
         logger.error(f"Error running benchmark: {e}", exc_info=True)
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+
+@app.route('/api/security/scan', methods=['POST'])
+def run_security_scan():
+    """
+    运行安全扫描
+    扫描当前项目的所有代码文件，检测安全漏洞
+    """
+    try:
+        if not pm_agent or not pm_agent.current_project_id:
+            return jsonify({
+                'success': False,
+                'error': 'No active project'
+            }), 404
+
+        project_id = pm_agent.current_project_id
+        project_path = Path(shared_state.workspace_root) / project_id
+
+        if not project_path.exists():
+            return jsonify({
+                'success': False,
+                'error': 'Project directory not found'
+            }), 404
+
+        # 运行安全扫描
+        scanner = SecurityScanner()
+        report = scanner.scan_project(str(project_path))
+
+        return jsonify({
+            'success': True,
+            'report': report.to_dict()
+        })
+
+    except Exception as e:
+        logger.error(f"Error running security scan: {e}", exc_info=True)
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+
+@app.route('/api/security/scan/file', methods=['POST'])
+def scan_file_security():
+    """
+    扫描单个文件的安全问题
+    """
+    try:
+        data = request.get_json()
+        file_path = data.get('file_path', '').strip()
+
+        if not file_path:
+            return jsonify({
+                'success': False,
+                'error': 'file_path is required'
+            }), 400
+
+        if not pm_agent or not pm_agent.current_project_id:
+            return jsonify({
+                'success': False,
+                'error': 'No active project'
+            }), 404
+
+        from pathlib import Path
+        project_id = pm_agent.current_project_id
+        full_path = Path(shared_state.workspace_root) / project_id / file_path
+
+        # 安全检查
+        try:
+            full_path = full_path.resolve()
+            project_root = (Path(shared_state.workspace_root) / project_id).resolve()
+            if not str(full_path).startswith(str(project_root)):
+                return jsonify({
+                    'success': False,
+                    'error': 'Invalid file path'
+                }), 403
+        except Exception:
+            return jsonify({
+                'success': False,
+                'error': 'Invalid file path'
+            }), 403
+
+        # 扫描文件
+        scanner = SecurityScanner()
+        vulnerabilities = scanner.scan_file(str(full_path))
+
+        return jsonify({
+            'success': True,
+            'file_path': file_path,
+            'vulnerabilities': [v.to_dict() for v in vulnerabilities],
+            'total': len(vulnerabilities)
+        })
+
+    except Exception as e:
+        logger.error(f"Error scanning file: {e}", exc_info=True)
         return jsonify({
             'success': False,
             'error': str(e)
