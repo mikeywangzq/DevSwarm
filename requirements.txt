@@ -30,3 +30,8 @@ psutil>=5.9.0
 # Development Tools (Optional)
 black>=23.0.0
 flake8>=6.0.0
+
+# Distributed Support (Optional)
+# For distributed message bus and state storage
+redis>=5.0.0
+psycopg2-binary>=2.9.0
