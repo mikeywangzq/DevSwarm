@@ -10,7 +10,7 @@
 
 **从自然语言需求到完整Web应用，只需几分钟** ⚡
 
-[快速开始](#-快速开始) • [在线演示](#-在线演示) • [文档](#-文档) • [贡献指南](CONTRIBUTING.md)
+[快速开始](#-快速开始) • [功能文档](docs/FEATURES.md) • [分布式架构](DISTRIBUTED_ARCHITECTURE.md) • [贡献指南](CONTRIBUTING.md)
 
 ---
 
@@ -764,11 +764,23 @@ llm:
 
 ## 📚 文档
 
-- 📖 [完整文档](README.md) - 本文档
-- 🏗️ [架构设计](ARCHITECTURE.md) - 技术架构详解
-- ⚡ [快速开始](QUICKSTART.md) - 5分钟快速体验
+### 核心文档
+- 📖 [项目概述](README.md) - 本文档
+- 🚀 [快速开始](QUICKSTART.md) - 5分钟快速体验
+- ⚡ [功能文档](docs/FEATURES.md) - 完整功能介绍和使用教程
+- 🏗️ [架构设计](ARCHITECTURE.md) - 系统架构详解
+
+### 高级文档
+- 🌐 [分布式架构](DISTRIBUTED_ARCHITECTURE.md) - 分布式部署设计
+- 🐛 [Bug修复记录](BUG_REPORT.md) - 代码质量审查和修复
 - 🤝 [贡献指南](CONTRIBUTING.md) - 如何贡献代码
-- 📝 [更新日志](CHANGELOG.md) - 版本更新记录
+
+### 快速导航
+- [多语言后端支持](docs/FEATURES.md#多语言后端支持) - Flask, Node.js, Go
+- [多框架前端支持](docs/FEATURES.md#多框架前端支持) - Vanilla JS, React, Vue
+- [测试与质量保证](docs/FEATURES.md#测试与质量保证) - E2E, 性能, 安全
+- [分布式部署](docs/FEATURES.md#分布式部署) - Docker, Kubernetes
+- [配置选项](docs/FEATURES.md#配置选项) - 环境变量和配置
 
 ## 🛠️ 技术栈
 
