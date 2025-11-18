@@ -60,10 +60,25 @@ class PostgreSQLStateStore:
     @contextmanager
     def _cursor(self):
         """获取数据库游标（上下文管理器）"""
+        # 检查连接状态并在需要时重连
+        if self.conn.closed:
+            logger.warning("Database connection was closed, reconnecting...")
+            try:
+                self.conn = psycopg2.connect(self.db_url)
+                logger.info("Successfully reconnected to database")
+            except psycopg2.Error as e:
+                logger.error(f"Failed to reconnect to database: {e}")
+                raise
+
         cursor = self.conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
         try:
             yield cursor
             self.conn.commit()
+        except psycopg2.OperationalError as e:
+            # 连接相关错误
+            self.conn.rollback()
+            logger.error(f"Database connection error: {e}")
+            raise
         except Exception as e:
             self.conn.rollback()
             logger.error(f"Database error: {e}")

@@ -28,6 +28,35 @@ import logging
 logger = logging.getLogger(__name__)
 
 
+def _validate_api_contract(api_contract: Dict[str, Any]) -> None:
+    """
+    验证API契约格式
+
+    Args:
+        api_contract: API契约字典
+
+    Raises:
+        ValueError: 如果契约格式不正确
+    """
+    if not isinstance(api_contract, dict):
+        raise ValueError("api_contract must be a dictionary")
+
+    endpoints = api_contract.get('endpoints', [])
+    if not isinstance(endpoints, list):
+        raise ValueError("api_contract.endpoints must be a list")
+
+    # 验证每个endpoint的基本结构
+    for i, ep in enumerate(endpoints):
+        if not isinstance(ep, dict):
+            logger.warning(f"Endpoint {i} is not a dictionary, skipping validation")
+            continue
+
+        if 'method' not in ep:
+            logger.warning(f"Endpoint {i} missing 'method' field")
+        if 'path' not in ep:
+            logger.warning(f"Endpoint {i} missing 'path' field")
+
+
 def generate_vanilla_frontend(api_contract: Dict[str, Any]) -> Dict[str, str]:
     """
     生成Vanilla JS前端代码（默认实现，已存在）
@@ -38,6 +67,9 @@ def generate_vanilla_frontend(api_contract: Dict[str, Any]) -> Dict[str, str]:
     Returns:
         Dict[str, str]: 文件路径到文件内容的映射
     """
+    # 验证API契约格式
+    _validate_api_contract(api_contract)
+
     # 这个是现有的实现，保持不变
     endpoints = api_contract.get('endpoints', [])
     base_url = api_contract.get('base_url', 'http://localhost:5000')
@@ -65,6 +97,9 @@ def generate_react_frontend(api_contract: Dict[str, Any]) -> Dict[str, str]:
     Returns:
         Dict[str, str]: 文件路径到文件内容的映射
     """
+    # 验证API契约格式
+    _validate_api_contract(api_contract)
+
     endpoints = api_contract.get('endpoints', [])
     base_url = api_contract.get('base_url', 'http://localhost:5000')
 
@@ -96,6 +131,9 @@ def generate_vue_frontend(api_contract: Dict[str, Any]) -> Dict[str, str]:
     Returns:
         Dict[str, str]: 文件路径到文件内容的映射
     """
+    # 验证API契约格式
+    _validate_api_contract(api_contract)
+
     endpoints = api_contract.get('endpoints', [])
     base_url = api_contract.get('base_url', 'http://localhost:5000')
 

@@ -103,7 +103,14 @@ class FrontendAgent(BaseAgent):
         logger.info(f"Generating frontend code with {frontend_framework}...")
 
         # 使用模板生成器生成代码
-        api_contract_dict = api_contract.to_dict()
+        # 确保api_contract是字典格式
+        if isinstance(api_contract, dict):
+            api_contract_dict = api_contract
+        elif hasattr(api_contract, 'to_dict'):
+            api_contract_dict = api_contract.to_dict()
+        else:
+            raise ValueError(f"Unsupported api_contract type: {type(api_contract)}")
+
         generated_files = generate_frontend(api_contract_dict, framework=frontend_framework)
 
         # 写入所有生成的文件

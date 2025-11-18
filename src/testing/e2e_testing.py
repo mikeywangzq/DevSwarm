@@ -41,6 +41,8 @@ try:
     PLAYWRIGHT_AVAILABLE = True
 except ImportError:
     PLAYWRIGHT_AVAILABLE = False
+    # Define fallback exception class to avoid NameError
+    PlaywrightError = Exception
     logger.warning("Playwright not installed. E2E testing will be limited. "
                   "Install with: pip install playwright && playwright install")
 

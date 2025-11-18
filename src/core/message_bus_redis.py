@@ -85,16 +85,17 @@ class RedisMessageBus:
                     logger.error("Failed to connect to Redis after all attempts")
                     raise
 
-    def publish(self, channel: str, message: Dict[str, Any]):
+    def publish(self, channel: str, message: Dict[str, Any], retry: bool = True):
         """
         发布消息到指定频道
 
         Args:
             channel: 频道名称（如 "task.backend", "result.frontend"）
             message: 消息字典
+            retry: 是否在连接失败时重试
 
         Raises:
-            redis.ConnectionError: Redis连接失败
+            redis.ConnectionError: Redis连接失败且重试失败
         """
         try:
             serialized = json.dumps(message)
@@ -102,9 +103,18 @@ class RedisMessageBus:
             logger.debug(f"Published message to {channel}: {message.get('type', 'unknown')}")
         except redis.ConnectionError as e:
             logger.error(f"Failed to publish message to {channel}: {e}")
-            # 尝试重连
-            self._connect()
-            raise
+            if retry:
+                logger.info("Attempting to reconnect and retry publishing...")
+                try:
+                    self._connect()
+                    # 重试一次，但不再递归重试
+                    self.publish(channel, message, retry=False)
+                    logger.info(f"Successfully published message after reconnection")
+                except Exception as retry_error:
+                    logger.error(f"Retry publishing failed: {retry_error}")
+                    raise
+            else:
+                raise
         except Exception as e:
             logger.error(f"Error publishing message: {e}")
             raise
